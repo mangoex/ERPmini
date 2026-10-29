@@ -10,6 +10,7 @@ from app.core.database import get_db_session
 from app.core.security import TenantContext, get_tenant_context
 from app.modules.purchase.models import (
     PurchaseGoodsReceiptNote,
+    PurchaseOrder,
     PurchaseSupplier,
 )
 from app.modules.purchase.schemas import (
@@ -55,6 +56,21 @@ async def create_order(
     po = await PurchaseService.create_purchase_order(db, ctx, data)
     await db.commit()
     return po
+
+
+@router.get("/orders", response_model=list[PurchaseOrderResponse])
+async def list_orders(
+    db: AsyncSession = Depends(get_db_session),
+    ctx: TenantContext = Depends(get_tenant_context),
+):
+    query = (
+        select(PurchaseOrder)
+        .where(PurchaseOrder.tenant_id == ctx.tenant_id)
+        .order_by(PurchaseOrder.created_at.desc())
+        .limit(100)
+    )
+    result = await db.execute(query)
+    return list(result.scalars().all())
 
 
 @router.post("/orders/{po_id}/approve", response_model=PurchaseOrderResponse)

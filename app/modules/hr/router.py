@@ -9,8 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
 from app.core.security import TenantContext, get_tenant_context
 from app.modules.hr.models import (
+    HRBiometricPunch,
     HRDepartment,
     HREmployee,
+    HRJobTitle,
+    HRPayRun,
 )
 from app.modules.hr.schemas import (
     BiometricPunchCreate,
@@ -61,6 +64,16 @@ async def create_job_title(
     job = await HRService.create_job_title(db, ctx, data)
     await db.commit()
     return job
+
+
+@router.get("/job-titles", response_model=list[JobTitleResponse])
+async def list_job_titles(
+    db: AsyncSession = Depends(get_db_session),
+    ctx: TenantContext = Depends(get_tenant_context),
+):
+    query = select(HRJobTitle).where(HRJobTitle.tenant_id == ctx.tenant_id)
+    result = await db.execute(query)
+    return list(result.scalars().all())
 
 
 @router.post("/employees", response_model=EmployeeResponse)
@@ -117,6 +130,21 @@ async def record_punch(
     return punch
 
 
+@router.get("/biometric/punches", response_model=list[BiometricPunchResponse])
+async def list_punches(
+    db: AsyncSession = Depends(get_db_session),
+    ctx: TenantContext = Depends(get_tenant_context),
+):
+    query = (
+        select(HRBiometricPunch)
+        .where(HRBiometricPunch.tenant_id == ctx.tenant_id)
+        .order_by(HRBiometricPunch.punch_in.desc())
+        .limit(100)
+    )
+    result = await db.execute(query)
+    return list(result.scalars().all())
+
+
 @router.post("/pay-runs", response_model=PayRunResponse)
 async def create_pay_run(
     data: PayRunCreate,
@@ -126,3 +154,18 @@ async def create_pay_run(
     pay_run = await HRService.create_and_approve_pay_run(db, ctx, data)
     await db.commit()
     return pay_run
+
+
+@router.get("/pay-runs", response_model=list[PayRunResponse])
+async def list_pay_runs(
+    db: AsyncSession = Depends(get_db_session),
+    ctx: TenantContext = Depends(get_tenant_context),
+):
+    query = (
+        select(HRPayRun)
+        .where(HRPayRun.tenant_id == ctx.tenant_id)
+        .order_by(HRPayRun.created_at.desc())
+        .limit(50)
+    )
+    result = await db.execute(query)
+    return list(result.scalars().all())

@@ -9,7 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db_session
 from app.core.security import TenantContext, get_tenant_context
 from app.modules.mrp.models import (
+    MRPBOMStructure,
     MRPProductionOrder,
+    MRPUnbuildOrder,
 )
 from app.modules.mrp.schemas import (
     BOMStructureCreate,
@@ -57,6 +59,16 @@ async def create_bom_line(
     return bom
 
 
+@router.get("/bom-lines", response_model=list[BOMStructureResponse])
+async def list_bom_lines(
+    db: AsyncSession = Depends(get_db_session),
+    ctx: TenantContext = Depends(get_tenant_context),
+):
+    query = select(MRPBOMStructure).where(MRPBOMStructure.tenant_id == ctx.tenant_id)
+    result = await db.execute(query)
+    return list(result.scalars().all())
+
+
 @router.get("/bom/explode/{product_id}")
 async def explode_bom(
     product_id: uuid.UUID,
@@ -102,3 +114,18 @@ async def execute_unbuild(
     unbuild = await MRPService.execute_regrind_unbuild(db, ctx, data)
     await db.commit()
     return unbuild
+
+
+@router.get("/unbuild-orders", response_model=list[UnbuildOrderResponse])
+async def list_unbuild_orders(
+    db: AsyncSession = Depends(get_db_session),
+    ctx: TenantContext = Depends(get_tenant_context),
+):
+    query = (
+        select(MRPUnbuildOrder)
+        .where(MRPUnbuildOrder.tenant_id == ctx.tenant_id)
+        .order_by(MRPUnbuildOrder.created_at.desc())
+        .limit(100)
+    )
+    result = await db.execute(query)
+    return list(result.scalars().all())
