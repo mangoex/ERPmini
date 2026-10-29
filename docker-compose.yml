@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: erpmini-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-erp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-erp_password_change_me}
+      POSTGRES_DB: ${POSTGRES_DB:-erpmini}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-erp} -d ${POSTGRES_DB:-erpmini}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erpmini-web
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "false"
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-erp}:${POSTGRES_PASSWORD:-erp_password_change_me}@db:5432/${POSTGRES_DB:-erpmini}
+      SECRET_KEY: ${SECRET_KEY:-erpmini-super-secret-key-production-change-me}
+      DEFAULT_TENANT_ID: ${DEFAULT_TENANT_ID:-01950000-0000-7000-8000-000000000001}
+      PORT: "8000"
+      HOST: "0.0.0.0"
+    ports:
+      - "${PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

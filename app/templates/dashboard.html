@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERPmini — Dashboard Industrial de Soplado e Inyección</title>
+    <style>
+        :root {
+            --color-bg: #090d16;
+            --color-surface: #111827;
+            --color-surface-hover: #1b2438;
+            --color-surface-elevated: #162032;
+            --color-border: #1e293b;
+            --color-border-hover: #334155;
+            --color-border-focus: #38bdf8;
+            --color-text: #f8fafc;
+            --color-text-muted: #94a3b8;
+            --color-text-dim: #64748b;
+            
+            --color-primary: #0284c7;
+            --color-primary-hover: #0369a1;
+            --color-primary-light: #38bdf8;
+            --color-primary-subtle: rgba(14, 165, 233, 0.12);
+
+            --color-success: #10b981;
+            --color-success-hover: #059669;
+            --color-success-subtle: rgba(16, 185, 129, 0.12);
+
+            --color-warning: #f59e0b;
+            --color-warning-hover: #d97706;
+            --color-warning-subtle: rgba(245, 158, 11, 0.12);
+
+            --color-danger: #ef4444;
+            --color-danger-hover: #dc2626;
+            --color-danger-subtle: rgba(239, 68, 68, 0.12);
+
+            --color-accent: #8b5cf6;
+            --color-accent-subtle: rgba(139, 92, 246, 0.12);
+
+            --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-full: 9999px;
+
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="light"] {
+            --color-bg: #f8fafc;
+            --color-surface: #ffffff;
+            --color-surface-hover: #f1f5f9;
+            --color-surface-elevated: #ffffff;
+            --color-border: #cbd5e1;
+            --color-border-hover: #94a3b8;
+            --color-border-focus: #0284c7;
+            --color-text: #0f172a;
+            --color-text-muted: #475569;
+            --color-text-dim: #94a3b8;
+
+            --color-primary: #0284c7;
+            --color-primary-hover: #0369a1;
+            --color-primary-light: #0369a1;
+            --color-primary-subtle: rgba(2, 132, 199, 0.1);
+
+            --color-success: #059669;
+            --color-success-hover: #047857;
+            --color-success-subtle: rgba(5, 150, 105, 0.1);
+
+            --color-warning: #d97706;
+            --color-warning-hover: #b45309;
+            --color-warning-subtle: rgba(217, 119, 6, 0.1);
+
+            --color-danger: #dc2626;
+            --color-danger-hover: #b91c1c;
+            --color-danger-subtle: rgba(220, 38, 38, 0.1);
+
+            --color-accent: #7c3aed;
+            --color-accent-subtle: rgba(124, 58, 237, 0.1);
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.5;
+            padding: var(--space-lg);
+            transition: background-color var(--transition-normal), color var(--transition-normal);
+        }
+
+        /* Enforce tabular numbers for all numeric readouts to prevent visual jitter */
+        .tnum {
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum";
+            font-family: var(--font-mono);
+        }
+
+        /* Focus rings for WCAG 2.1 AA accessibility */
+        :focus-visible {
+            outline: 2px solid var(--color-border-focus);
+            outline-offset: 2px;
+        }
+
+        /* Top Header */
+        header.plant-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-md);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+            margin-bottom: var(--space-lg);
+        }
+
+        .header-title-group h1 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--color-primary-light);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .header-title-group p {
+            color: var(--color-text-muted);
+            font-size: 0.875rem;
+            margin-top: 2px;
+        }
+
+        .header-badges {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+        }
+
+        .badge-success {
+            background-color: var(--color-success-subtle);
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+
+        .badge-warning {
+            background-color: var(--color-warning-subtle);
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning);
+        }
+
+        .badge-info {
+            background-color: var(--color-primary-subtle);
+            color: var(--color-primary-light);
+            border: 1px solid var(--color-primary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+            display: inline-block;
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: #ffffff;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--color-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: #ffffff;
+        }
+        .btn-success:hover:not(:disabled) {
+            background-color: var(--color-success-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background-color: var(--color-warning);
+            color: #000000;
+        }
+        .btn-warning:hover:not(:disabled) {
+            background-color: var(--color-warning-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border-color: var(--color-border);
+            color: var(--color-text);
+        }
+        .btn-outline:hover:not(:disabled) {
+            background-color: var(--color-surface-hover);
+            border-color: var(--color-border-hover);
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        /* Role switcher selector */
+        .role-selector-bar {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .role-btn {
+            border: none;
+            background: transparent;
+            color: var(--color-text-muted);
+            padding: 4px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .role-btn.active {
+            background: var(--color-primary);
+            color: #ffffff;
+        }
+
+        /* Top Operational Banner */
+        .shift-banner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md) var(--space-lg);
+        }
+
+        .banner-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .banner-icon {
+            font-size: 1.5rem;
+            background: var(--color-primary-subtle);
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-md);
+        }
+
+        .banner-info h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-dim);
+        }
+
+        .banner-info p {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .kpi-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform var(--transition-fast), border-color var(--transition-fast);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--color-border-hover);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-xs);
+        }
+
+        .kpi-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: var(--space-xs) 0;
+            color: var(--color-text);
+        }
+
+        .kpi-card.highlight-resin .kpi-value { color: var(--color-primary-light); }
+        .kpi-card.highlight-regrind .kpi-value { color: var(--color-success); }
+        .kpi-card.highlight-uv .kpi-value { color: var(--color-accent); }
+        .kpi-card.highlight-scrap .kpi-value { color: var(--color-warning); }
+        .kpi-card.highlight-crates .kpi-value { color: var(--color-success); }
+
+        .kpi-subtext {
+            font-size: 0.75rem;
+            color: var(--color-text-dim);
+            line-height: 1.3;
+        }
+
+        /* Workstations Main Grid */
+        .workstations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        @media (max-width: 900px) {
+            .workstations-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .workstation-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+        }
+
+        .workstation-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: var(--space-sm);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .workstation-header h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-sm);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .form-control {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            color: var(--color-text);
+            font-family: inherit;
+            transition: border-color var(--transition-fast);
+        }
+
+        .form-control:focus {
+            border-color: var(--color-border-focus);
+        }
+
+        .chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .chip {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .chip:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary-light);
+        }
+
+        .net-weight-box, .bom-formula-box, .mass-balance-box {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm) var(--space-md);
+            font-size: 0.85rem;
+        }
+
+        .net-weight-box .net-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--color-success);
+        }
+
+        .bom-formula-box ul {
+            list-style: none;
+            margin-top: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 0.8rem;
+        }
+
+        .bom-formula-box li {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* WhatsApp / GrokBot Simulator Phone UI */
+        .chat-simulator {
+            display: flex;
+            flex-direction: column;
+            height: 480px;
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: var(--color-surface-elevated);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .chat-header-user {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .chat-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--color-success);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .chat-stream {
+            flex: 1;
+            padding: var(--space-md);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .chat-msg {
+            max-width: 85%;
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.825rem;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .chat-msg-user {
+            align-self: flex-end;
+            background: #0284c7;
+            color: #ffffff;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-msg-bot {
+            align-self: flex-start;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            border-bottom-left-radius: 2px;
+        }
+
+        .chat-msg-meta {
+            font-size: 0.65rem;
+            opacity: 0.75;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-input-bar {
+            padding: 8px;
+            background: var(--color-surface);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Audit & Outbox Tables Section */
+        .logs-section {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .logs-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-md);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table.industrial-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+
+        table.industrial-table th {
+            background: var(--color-bg);
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        table.industrial-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        table.industrial-table tr:hover td {
+            background: var(--color-surface-hover);
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: var(--space-lg);
+            right: var(--space-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .toast {
+            pointer-events: auto;
+            background: var(--color-surface-elevated);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            box-shadow: var(--shadow-lg);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            animation: slide-in 0.25s ease-out;
+            max-width: 360px;
+        }
+
+        .toast-success { border-left: 4px solid var(--color-success); }
+        .toast-error { border-left: 4px solid var(--color-danger); }
+        .toast-info { border-left: 4px solid var(--color-primary); }
+
+        @keyframes slide-in {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Principal -->
+    <header class="plant-header" role="banner">
+        <div class="header-title-group">
+            <h1>
+                <span>🏭</span> ERPmini — Planta Industrial de Soplado e Inyección
+            </h1>
+            <p>Monolito Modular Estricto | Silos HDPE, Báscula Camionera, Molino de Rebaba y GrokBot con RBAC</p>
+        </div>
+
+        <div class="header-controls">
+            <div class="header-badges">
+                <span class="badge badge-success" role="status" aria-live="polite">
+                    <span class="status-dot"></span> Planta 100% Operativa
+                </span>
+                <span class="badge badge-info" id="current-tenant-badge" title="Tenant RFC 9562 UUIDv7">
+                    Tenant: Demo AgroPlásticos
+                </span>
+            </div>
+
+            <!-- Selector de Rol RBAC Activo -->
+            <div class="role-selector-bar" role="group" aria-label="Simular Rol RBAC">
+                <button type="button" class="role-btn active" id="btn-role-admin" onclick="setSimulatedRole('ADMIN_PLANTA', '*')">
+                    👑 Gerente Planta
+                </button>
+                <button type="button" class="role-btn" id="btn-role-operator" onclick="setSimulatedRole('OPERADOR_PLANTA', 'mrp:view_work_centers')">
+                    👷 Operador Báscula
+                </button>
+            </div>
+
+            <button type="button" class="btn btn-outline btn-sm" id="btn-theme-toggle" onclick="toggleTheme()" aria-label="Alternar modo claro u oscuro">
+                🌙 Oscuro
+            </button>
+
+            <button type="button" class="btn btn-primary btn-sm" id="btn-seed" onclick="seedPlantDemoData()">
+                🌱 Cargar Datos Demo (Seed)
+            </button>
+
+            <button type="button" class="btn btn-outline btn-sm" id="btn-refresh" onclick="refreshDashboardState()" title="Actualizar Datos">
+                🔄 Refrescar
+            </button>
+        </div>
+    </header>
+
+    <main role="main">
+        <!-- Banner de Turno y Centros de Trabajo Activos -->
+        <section class="shift-banner" aria-label="Resumen de Operación 24/7">
+            <div class="banner-item">
+                <div class="banner-icon">⏰</div>
+                <div class="banner-info">
+                    <h4>Turno Actual 24/7</h4>
+                    <p id="shift-display">Turno Matutino (06:00 - 14:00) | 3 Operadores</p>
+                </div>
+            </div>
+            <div class="banner-item">
+                <div class="banner-icon">⚙️</div>
+                <div class="banner-info">
+                    <h4>Maquinaria Activa</h4>
+                    <p id="machinery-display">Kautex KBS-20 | Engel duo 450T | Pagani 50HP</p>
+                </div>
+            </div>
+            <div class="banner-item">
+                <div class="banner-icon">🛡️</div>
+                <div class="banner-info">
+                    <h4>Seguridad y Auditoría</h4>
+                    <p id="audit-summary-display">RFC 9562 UUIDv7 Monotónico | Outbox Activo</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Strip de KPIs en Tiempo Real -->
+        <section class="kpi-grid" aria-label="Indicadores Clave de Desempeño">
+            <div class="kpi-card highlight-resin">
+                <div class="kpi-header">
+                    <span class="kpi-title">Resina Virgen HDPE</span>
+                    <span>🛢️</span>
+                </div>
+                <div class="kpi-value tnum" id="kpi-resin-virgin">-- KG</div>
+                <div class="kpi-subtext" id="kpi-silos-breakdown">Silo 1: -- kg | Silo 2: -- kg</div>
+            </div>
+
+            <div class="kpi-card highlight-regrind">
+                <div class="kpi-header">
+                    <span class="kpi-title">Regrind Recuperado</span>
+                    <span>♻️</span>
+                </div>
+                <div class="kpi-value tnum" id="kpi-regrind">-- KG</div>
+                <div class="kpi-subtext">Tolva de Material Molido (Bucle Cerrado)</div>
+            </div>
+
+            <div class="kpi-card highlight-uv">
+                <div class="kpi-header">
+                    <span class="kpi-title">Masterbatch UV Verde</span>
+                    <span>🧪</span>
+                </div>
+                <div class="kpi-value tnum" id="kpi-masterbatch">-- KG</div>
+                <div class="kpi-subtext">Almacén de Pigmentos (Filtro Solar Agrícola)</div>
+            </div>
+
+            <div class="kpi-card highlight-scrap">
+                <div class="kpi-header">
+                    <span class="kpi-title">Rebaba en Molino</span>
+                    <span>⚠️</span>
+                </div>
+                <div class="kpi-value tnum" id="kpi-scrap-flash">-- KG</div>
+                <div class="kpi-subtext" id="kpi-scrap-status">Tolva Molino Pagani (Listo para Molienda)</div>
+            </div>
+
+            <div class="kpi-card highlight-crates">
+                <div class="kpi-header">
+                    <span class="kpi-title">Cajas Terminadas</span>
+                    <span>📦</span>
+                </div>
+                <div class="kpi-value tnum" id="kpi-finished-crates">-- PZAS</div>
+                <div class="kpi-subtext" id="kpi-crates-breakdown">Cosechera 20kg & Exportación 15kg</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-title">Eventos & Auditoría</span>
+                    <span>📋</span>
+                </div>
+                <div class="kpi-value tnum" id="kpi-events-count">--</div>
+                <div class="kpi-subtext" id="kpi-events-subtext">Outbox PENDIENTE | Logs Inmutables</div>
+            </div>
+        </section>
+
+        <!-- Cuadrícula de 4 Estaciones de Operación Interactiva -->
+        <section class="workstations-grid" aria-label="Estaciones Operativas de Planta">
+
+            <!-- Estación 1: Báscula Camionera -->
+            <div class="workstation-card">
+                <div class="workstation-header">
+                    <h3><span>⚖️</span> 1. Báscula Camionera (Recepción GRN)</h3>
+                    <span class="badge badge-info">Recepción MP</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--color-text-muted);">
+                    Registra la pesada del camión cisterna/tolva de Petroquímica. Calcula automáticamente Peso Neto e ingresa el lote al Silo destino.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="scale-ticket">No. Ticket Báscula</label>
+                        <input type="text" id="scale-ticket" class="form-control tnum" value="TKT-BASC-8821">
+                    </div>
+                    <div class="form-group">
+                        <label for="scale-product">Resina a Descargar</label>
+                        <select id="scale-product" class="form-control" onchange="updateScaleSiloAuto()">
+                            <option value="HDPE-SOPLADO-5502">HDPE Soplado 5502 (Silo 1)</option>
+                            <option value="HDPE-INJ-6070">HDPE Inyección 6070 (Silo 2)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="scale-gross">Peso Bruto Entrada (KG)</label>
+                        <input type="number" id="scale-gross" class="form-control tnum" value="38500" step="100" oninput="computeScaleNet()">
+                    </div>
+                    <div class="form-group">
+                        <label for="scale-tare">Peso Tara Camión Vacío (KG)</label>
+                        <input type="number" id="scale-tare" class="form-control tnum" value="14500" step="100" oninput="computeScaleNet()">
+                    </div>
+                </div>
+
+                <div class="chip-group">
+                    <span style="font-size: 0.75rem; color: var(--color-text-dim); align-self: center;">Preajustes:</span>
+                    <button type="button" class="chip" onclick="setScalePreset(38500, 14500)">Tolva Granel (+24,000 kg)</button>
+                    <button type="button" class="chip" onclick="setScalePreset(24000, 12000)">Rabón Petro (+12,000 kg)</button>
+                    <button type="button" class="chip" onclick="setScalePreset(8500, 3500)">Camioneta (+5,000 kg)</button>
+                </div>
+
+                <div class="net-weight-box">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-dim);">Peso Neto Liquidable a Silo:</div>
+                    <div class="net-val tnum" id="scale-net-display">24,000.00 KG</div>
+                    <div style="font-size: 0.75rem; color: var(--color-text-muted);" id="scale-dest-label">Destino: Silo 1 Resina HDPE Soplado (LOC-SILO-01)</div>
+                </div>
+
+                <button type="button" class="btn btn-primary" id="btn-scale-submit" onclick="executeScaleGRN()">
+                    ⚖️ Registrar Pesaje y Descarga en Silo (GRN)
+                </button>
+            </div>
+
+            <!-- Estación 2: Piso de Planta (Soplado / Inyección) -->
+            <div class="workstation-card">
+                <div class="workstation-header">
+                    <h3><span>🏭</span> 2. Piso de Planta (Soplado de Cajas)</h3>
+                    <span class="badge badge-success">Producción Activa</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--color-text-muted);">
+                    Lanza una orden de producción consumiendo Resina Virgen + Regrind + Masterbatch UV según BOM, generando producto terminado y rebaba flash.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mrp-workcenter">Centro de Trabajo</label>
+                        <select id="mrp-workcenter" class="form-control" onchange="updateProductFromWorkCenter()">
+                            <option value="ENGEL-DUO-450">Inyectora Engel duo 450T (Molde 20kg)</option>
+                            <option value="KAUTEX-KBS-20">Sopladora Kautex KBS (Molde 15kg)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mrp-product">Caja a Producir</label>
+                        <select id="mrp-product" class="form-control" onchange="updateBomPreview()">
+                            <option value="CAJA-AGRO-20KG">Caja Cosechera 20kg (2.0 kg/pza)</option>
+                            <option value="CAJA-EXPORT-15KG">Caja Exportación 15kg (1.5 kg/pza)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mrp-qty">Cantidad a Fabricar (Pzas)</label>
+                    <input type="number" id="mrp-qty" class="form-control tnum" value="100" min="1" step="25" oninput="updateBomPreview()">
+                </div>
+
+                <div class="chip-group">
+                    <span style="font-size: 0.75rem; color: var(--color-text-dim); align-self: center;">Lotes Rápidos:</span>
+                    <button type="button" class="chip" onclick="setMrpQty(50)">50 pzas</button>
+                    <button type="button" class="chip" onclick="setMrpQty(100)">100 pzas</button>
+                    <button type="button" class="chip" onclick="setMrpQty(250)">250 pzas</button>
+                    <button type="button" class="chip" onclick="setMrpQty(500)">500 pzas</button>
+                </div>
+
+                <div class="bom-formula-box" id="bom-preview-box">
+                    <div style="font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--color-primary-light);">
+                        Explosión BOM Recursiva Estimada:
+                    </div>
+                    <ul>
+                        <li><span>• Resina Virgen HDPE:</span> <strong class="tnum" id="bom-resin-req">140.0 kg</strong></li>
+                        <li><span>• Material Molido Regrind:</span> <strong class="tnum" id="bom-regrind-req">56.0 kg</strong></li>
+                        <li><span>• Masterbatch UV Verde:</span> <strong class="tnum" id="bom-mb-req">4.0 kg</strong></li>
+                        <li style="border-top: 1px dashed var(--color-border); padding-top: 4px; margin-top: 4px;">
+                            <span style="color: var(--color-warning);">⚡ Rebaba Generada hacia Molino:</span>
+                            <strong class="tnum" style="color: var(--color-warning);" id="bom-scrap-gen">+14.0 kg</strong>
+                        </li>
+                    </ul>
+                </div>
+
+                <button type="button" class="btn btn-success" id="btn-mrp-submit" onclick="executeProductionRun()">
+                    🏭 Lanzar Corrida de Producción (1 Clic)
+                </button>
+            </div>
+
+            <!-- Estación 3: Molino Granulador -->
+            <div class="workstation-card">
+                <div class="workstation-header">
+                    <h3><span>⚙️</span> 3. Molino Granulador (Reciclaje Rebaba)</h3>
+                    <span class="badge badge-warning">Bucle Cerrado</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--color-text-muted);">
+                    Muele la rebaba acumulada convirtiéndola en Regrind reutilizable. Valida balance estricto de masa: Entrada = Salida + Pérdida.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="regrind-workcenter">Molino Granulador</label>
+                        <select id="regrind-workcenter" class="form-control" disabled>
+                            <option value="PAGANI-GR-50">Molino Pagani 50HP (Piso Molino)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="regrind-input-qty">Rebaba a Moler (KG)</label>
+                        <input type="number" id="regrind-input-qty" class="form-control tnum" value="14.0" step="1" min="1" oninput="computeMassBalance()">
+                    </div>
+                </div>
+
+                <div class="chip-group">
+                    <span style="font-size: 0.75rem; color: var(--color-text-dim); align-self: center;">Acción Directa:</span>
+                    <button type="button" class="chip" onclick="setRegrindAllScrap()">♻️ Moler Toda la Rebaba en Tolva</button>
+                    <button type="button" class="chip" onclick="setRegrindQty(25)">Lote 25 kg</button>
+                    <button type="button" class="chip" onclick="setRegrindQty(50)">Lote 50 kg</button>
+                </div>
+
+                <div class="mass-balance-box" id="mass-balance-box">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-dim);">
+                        Verificación de Balance de Masa Físico:
+                    </div>
+                    <div style="margin: 6px 0; font-size: 0.85rem;">
+                        <div>Entrada Rebaba: <strong class="tnum" id="mb-input">14.00 kg</strong></div>
+                        <div style="color: var(--color-success);">➜ Salida Regrind Flakes (96.5%): <strong class="tnum" id="mb-output">13.51 kg</strong></div>
+                        <div style="color: var(--color-text-dim);">➜ Pérdida Polvo de Proceso (3.5%): <strong class="tnum" id="mb-loss">0.49 kg</strong></div>
+                    </div>
+                    <div style="font-size: 0.75rem; color: var(--color-success); font-weight: 600;">
+                        ✓ Balance Estricto Cumplido: Delta = 0.000 kg
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-warning" id="btn-regrind-submit" onclick="executeRegrindMilling()">
+                    ⚙️ Activar Molino Pagani y Recuperar Regrind
+                </button>
+            </div>
+
+            <!-- Estación 4: Simulador WhatsApp / GrokBot con RBAC -->
+            <div class="workstation-card">
+                <div class="workstation-header">
+                    <h3><span>💬</span> 4. Simulador WhatsApp / GrokBot</h3>
+                    <span class="badge badge-info" id="bot-role-tag">Rol: ADMIN_PLANTA</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--color-text-muted);">
+                    Prueba comandos en vivo hacia <code style="font-size: 0.75rem; color: var(--color-primary-light);">/api/v1/bot/whatsapp/webhook</code>. Comprueba cómo el RBAC aprueba o bloquea herramientas restringidas.
+                </p>
+
+                <div class="chip-group" style="margin-bottom: var(--space-xs);">
+                    <span style="font-size: 0.75rem; color: var(--color-text-dim); align-self: center;">Comandos Rápidos:</span>
+                    <button type="button" class="chip" onclick="sendBotPreset('Consultar estado de centros de trabajo', 'mrp:view_work_centers', {})">
+                        🔍 Ver Máquinas (Libre)
+                    </button>
+                    <button type="button" class="chip" onclick="sendBotPreset('Aprobar factura proveedor FAC-PROV-1000', 'account:approve_invoice', {invoice_number: 'FAC-PROV-1000'})">
+                        🔒 Aprobar Factura (Restringido)
+                    </button>
+                    <button type="button" class="chip" onclick="sendBotPreset('Consultar saldo de resina en silos', 'inventory:view_stock', {location: 'SILOS'})">
+                        📊 Stock Silos (Libre)
+                    </button>
+                </div>
+
+                <!-- Chat Phone UI -->
+                <div class="chat-simulator" role="region" aria-label="Terminal de Chat WhatsApp">
+                    <div class="chat-header">
+                        <div class="chat-header-user">
+                            <div class="chat-avatar">🤖</div>
+                            <div>
+                                <div style="font-size: 0.85rem; font-weight: 700;">GrokBot Planta 24/7</div>
+                                <div style="font-size: 0.7rem; color: var(--color-success);" id="chat-identity-label">Usuario: +5216671000001 (Gerente)</div>
+                            </div>
+                        </div>
+                        <span class="badge badge-success" style="font-size: 0.65rem;">En Línea</span>
+                    </div>
+
+                    <div class="chat-stream" id="chat-messages" role="log" aria-live="polite">
+                        <div class="chat-msg chat-msg-bot">
+                            <div>¡Hola! Soy GrokBot, tu asistente industrial ERPmini. Puedes solicitar consultas de stock, consultar centros de trabajo o aprobar documentos. Tu rol actual determina tus permisos RBAC.</div>
+                            <div class="chat-msg-meta">Sistema • Ahora</div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-bar">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Escribe un comando o selecciona uno rápido..." onkeydown="if(event.key==='Enter') sendCustomChatMessage()">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="sendCustomChatMessage()">Enviar</button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Sección de Auditoría Inmutable y Outbox Transaccional en Vivo -->
+        <section class="logs-section" aria-label="Pistas de Auditoría y Outbox">
+            <div class="logs-header">
+                <div>
+                    <h3 style="font-size: 1.15rem; font-weight: 700;">📋 Pista de Auditoría Inmutable (`SystemAuditLog`) y Outbox</h3>
+                    <p style="font-size: 0.8rem; color: var(--color-text-muted);">Registros criptográficos secuenciales RFC 9562 UUIDv7 generados por cada operación en planta</p>
+                </div>
+                <div style="display: flex; gap: var(--space-sm);">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="refreshDashboardState()">Actualizar Pistas</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="industrial-table" id="audit-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Timestamp (UTC)</th>
+                            <th scope="col">Acción Operativa</th>
+                            <th scope="col">Entidad</th>
+                            <th scope="col">UUIDv7 Inmutable</th>
+                            <th scope="col">Detalles Transacción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--color-text-dim); padding: var(--space-md);">
+                                Esperando transacciones... Haz clic en "Cargar Datos Demo" o ejecuta una acción en las estaciones.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contenedor de Toasts Accesibles -->
+    <div id="toast-container" role="status" aria-live="polite"></div>
+
+    <!-- Script de Lógica Frontend Conectado a Endpoints Reales -->
+    <script>
+        // Configuración de Tenant y Roles
+        const DEFAULT_TENANT_ID = "01950000-0000-7000-8000-000000000001";
+        let currentTenantId = localStorage.getItem("erpmini_tenant_id") || DEFAULT_TENANT_ID;
+        localStorage.setItem("erpmini_tenant_id", currentTenantId);
+
+        let currentRole = "ADMIN_PLANTA";
+        let currentPermissions = ["*"];
+        let currentPhone = "+5216671000001";
+        let lastState = null;
+
+        // Inicialización al cargar la página
+        document.addEventListener("DOMContentLoaded", () => {
+            computeScaleNet();
+            updateBomPreview();
+            computeMassBalance();
+            refreshDashboardState();
+            
+            // Auto refresco suave cada 10 segundos
+            setInterval(refreshDashboardState, 10000);
+        });
+
+        // Manejo de Headers con TenantContext
+        function getHeaders() {
+            return {
+                "Content-Type": "application/json",
+                "X-Tenant-Id": currentTenantId,
+                "X-User-Roles": currentRole,
+                "X-Branch-Id": currentTenantId,
+            };
+        }
+
+        // Alternar Tema Claro / Oscuro
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute("data-theme") || "dark";
+            const next = current === "dark" ? "light" : "dark";
+            html.setAttribute("data-theme", next);
+            document.getElementById("btn-theme-toggle").textContent = next === "dark" ? "🌙 Oscuro" : "☀️ Claro";
+            showToast(`Tema cambiado a modo ${next}`, "info");
+        }
+
+        // Simular Rol RBAC Activo
+        function setSimulatedRole(role, permission) {
+            currentRole = role;
+            currentPermissions = permission === "*" ? ["*"] : [permission];
+            
+            document.getElementById("btn-role-admin").classList.toggle("active", role === "ADMIN_PLANTA");
+            document.getElementById("btn-role-operator").classList.toggle("active", role === "OPERADOR_PLANTA");
+
+            const isGerente = role === "ADMIN_PLANTA";
+            currentPhone = isGerente ? "+5216671000001" : "+5216671234567";
+            
+            document.getElementById("bot-role-tag").textContent = `Rol: ${role}`;
+            document.getElementById("chat-identity-label").textContent = `Usuario: ${currentPhone} (${isGerente ? "Gerente" : "Operador"})`;
+            
+            showToast(`Modo cambiado: ${isGerente ? "Gerente de Planta (Acceso Total)" : "Operador Báscula (Restringido)"}`, "info");
+        }
+
+        // Mostrar Notificación Toast
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `toast toast-${type}`;
+            const icon = type === "success" ? "✓" : type === "error" ? "✕" : "ℹ";
+            toast.innerHTML = `<strong>${icon}</strong> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transform = "translateX(100%)";
+                toast.style.transition = "all 0.3s ease";
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // 1. Cargar Datos Demo (Seed)
+        async function seedPlantDemoData() {
+            const btn = document.getElementById("btn-seed");
+            btn.disabled = true;
+            btn.textContent = "🌱 Sembrando...";
+            try {
+                const res = await fetch("/api/v1/seed", {
+                    method: "POST",
+                    headers: getHeaders(),
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                showToast("¡Datos de demostración cargados exitosamente! Silos y moldes listos.", "success");
+                await refreshDashboardState();
+            } catch (err) {
+                showToast(`Error al sembrar datos: ${err.message}`, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "🌱 Cargar Datos Demo (Seed)";
+            }
+        }
+
+        // 2. Refrescar Estado Completo del Dashboard
+        async function refreshDashboardState() {
+            try {
+                const res = await fetch("/api/v1/demo/dashboard-state", {
+                    headers: getHeaders(),
+                });
+                if (!res.ok) return;
+                const state = await res.json();
+                lastState = state;
+                renderState(state);
+            } catch (err) {
+                console.error("Error refreshing state:", err);
+            }
+        }
+
+        function renderState(state) {
+            const k = state.kpis || {};
+            document.getElementById("kpi-resin-virgin").textContent = `${formatNum(k.resin_virgin_total_kg || 0)} KG`;
+            document.getElementById("kpi-silos-breakdown").textContent = 
+                `Silo 1: ${formatNum(k.resin_soplado_silo1_kg || 0)} kg | Silo 2: ${formatNum(k.resin_inyeccion_silo2_kg || 0)} kg`;
+            
+            document.getElementById("kpi-regrind").textContent = `${formatNum(k.regrind_hopper_kg || 0)} KG`;
+            document.getElementById("kpi-masterbatch").textContent = `${formatNum(k.masterbatch_uv_kg || 0)} KG`;
+            
+            const scrapVal = k.scrap_mill_hopper_kg || 0;
+            document.getElementById("kpi-scrap-flash").textContent = `${formatNum(scrapVal)} KG`;
+            const scrapCard = document.querySelector(".kpi-card.highlight-scrap");
+            if (scrapVal > 0) {
+                scrapCard.style.borderColor = "var(--color-warning)";
+                document.getElementById("kpi-scrap-status").textContent = `Tolva con ${formatNum(scrapVal)} kg lista para moler`;
+            } else {
+                scrapCard.style.borderColor = "var(--color-border)";
+                document.getElementById("kpi-scrap-status").textContent = "Tolva Vacía (Generar en Soplado)";
+            }
+
+            document.getElementById("kpi-finished-crates").textContent = `${formatNum(k.finished_crates_total_pcs || 0)} PZAS`;
+            document.getElementById("kpi-crates-breakdown").textContent = 
+                `Cosechera 20kg: ${formatNum(k.crates_20kg_pcs || 0)} | Export: ${formatNum(k.crates_15kg_pcs || 0)}`;
+
+            document.getElementById("kpi-events-count").textContent = `${k.outbox_pending_count || 0} Pend. | ${k.audit_logs_count || 0} Logs`;
+
+            // Actualizar tabla de auditoría inmutable
+            renderAuditLogs(state.recent_audit_logs || []);
+        }
+
+        function renderAuditLogs(logs) {
+            const tbody = document.getElementById("audit-table-body");
+            if (!logs || logs.length === 0) return;
+            
+            tbody.innerHTML = logs.map(l => {
+                const ts = new Date(l.created_at).toLocaleTimeString();
+                const isBlocked = (l.action || "").includes("BLOCKED") || (l.action || "").includes("DENIED");
+                const badgeColor = isBlocked ? "var(--color-danger)" : "var(--color-success)";
+                const details = JSON.stringify(l.new_value || {}).replace(/["{}]/g, " ");
+                return `
+                    <tr>
+                        <td class="tnum" style="color: var(--color-text-dim);">${ts}</td>
+                        <td><strong style="color: ${badgeColor};">${l.action}</strong></td>
+                        <td>${l.entity_name}</td>
+                        <td class="tnum" style="font-size: 0.7rem; color: var(--color-text-dim);">${l.id}</td>
+                        <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${details}">${details}</td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function formatNum(num) {
+            return Number(num).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        }
+
+        // ==========================================
+        // Estación 1: Báscula Camionera Logic
+        // ==========================================
+        function updateScaleSiloAuto() {
+            const prod = document.getElementById("scale-product").value;
+            const destLabel = document.getElementById("scale-dest-label");
+            if (prod === "HDPE-SOPLADO-5502") {
+                destLabel.textContent = "Destino: Silo 1 Resina HDPE Soplado (LOC-SILO-01)";
+            } else {
+                destLabel.textContent = "Destino: Silo 2 Resina HDPE Inyección (LOC-SILO-02)";
+            }
+        }
+
+        function computeScaleNet() {
+            const gross = parseFloat(document.getElementById("scale-gross").value) || 0;
+            const tare = parseFloat(document.getElementById("scale-tare").value) || 0;
+            const net = Math.max(0, gross - tare);
+            document.getElementById("scale-net-display").textContent = `${formatNum(net)} KG`;
+            return net;
+        }
+
+        function setScalePreset(gross, tare) {
+            document.getElementById("scale-gross").value = gross;
+            document.getElementById("scale-tare").value = tare;
+            computeScaleNet();
+        }
+
+        async function executeScaleGRN() {
+            const net = computeScaleNet();
+            if (net <= 0) {
+                showToast("El peso neto debe ser mayor a 0 kg", "error");
+                return;
+            }
+            const prod = document.getElementById("scale-product").value;
+            const silo = prod === "HDPE-SOPLADO-5502" ? "LOC-SILO-01" : "LOC-SILO-02";
+            const ticket = document.getElementById("scale-ticket").value || `TKT-${Date.now().toString().slice(-6)}`;
+            const btn = document.getElementById("btn-scale-submit");
+
+            btn.disabled = true;
+            btn.textContent = "⚖️ Registrando Entrada...";
+
+            try {
+                const res = await fetch("/api/v1/demo/quick-grn", {
+                    method: "POST",
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        ticket_number: ticket,
+                        product_sku: prod,
+                        gross_weight_kg: parseFloat(document.getElementById("scale-gross").value),
+                        tare_weight_kg: parseFloat(document.getElementById("scale-tare").value),
+                        silo_code: silo,
+                    }),
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                showToast(`¡Entrada en Báscula registrada! +${formatNum(data.net_weight_kg)} kg ingresados a ${silo}`, "success");
+                document.getElementById("scale-ticket").value = `TKT-BASC-${Math.floor(1000 + Math.random() * 9000)}`;
+                await refreshDashboardState();
+            } catch (err) {
+                showToast(`Error al registrar pesaje: ${err.message}`, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "⚖️ Registrar Pesaje y Descarga en Silo (GRN)";
+            }
+        }
+
+        // ==========================================
+        // Estación 2: Piso de Planta (Soplado) Logic
+        // ==========================================
+        function updateProductFromWorkCenter() {
+            const wc = document.getElementById("mrp-workcenter").value;
+            const prodSel = document.getElementById("mrp-product");
+            if (wc === "ENGEL-DUO-450") {
+                prodSel.value = "CAJA-AGRO-20KG";
+            } else {
+                prodSel.value = "CAJA-EXPORT-15KG";
+            }
+            updateBomPreview();
+        }
+
+        function setMrpQty(qty) {
+            document.getElementById("mrp-qty").value = qty;
+            updateBomPreview();
+        }
+
+        function updateBomPreview() {
+            const qty = parseFloat(document.getElementById("mrp-qty").value) || 0;
+            const prod = document.getElementById("mrp-product").value;
+            
+            // Fórmula BOM: Caja 20kg (2.0kg) vs 15kg (1.5kg)
+            const factor = prod === "CAJA-AGRO-20KG" ? 1.0 : 0.75;
+            const resinReq = (qty * 1.40 * factor).toFixed(1);
+            const regrindReq = (qty * 0.56 * factor).toFixed(1);
+            const mbReq = (qty * 0.04 * factor).toFixed(1);
+            const scrapGen = (qty * 0.14 * factor).toFixed(1);
+
+            document.getElementById("bom-resin-req").textContent = `${resinReq} kg`;
+            document.getElementById("bom-regrind-req").textContent = `${regrindReq} kg`;
+            document.getElementById("bom-mb-req").textContent = `${mbReq} kg`;
+            document.getElementById("bom-scrap-gen").textContent = `+${scrapGen} kg`;
+        }
+
+        async function executeProductionRun() {
+            const qty = parseFloat(document.getElementById("mrp-qty").value) || 0;
+            if (qty <= 0) {
+                showToast("Ingresa una cantidad mayor a 0", "error");
+                return;
+            }
+            const wc = document.getElementById("mrp-workcenter").value;
+            const prod = document.getElementById("mrp-product").value;
+            const btn = document.getElementById("btn-mrp-submit");
+
+            btn.disabled = true;
+            btn.textContent = "🏭 Ejecutando Soplado...";
+
+            try {
+                const res = await fetch("/api/v1/demo/quick-production", {
+                    method: "POST",
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        work_center_code: wc,
+                        product_sku: prod,
+                        qty_planned: qty,
+                    }),
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                showToast(`¡Producción finalizada! +${data.qty_produced} Cajas producidas | +${formatNum(data.scrap_generated_kg)} kg rebaba al molino`, "success");
+                await refreshDashboardState();
+            } catch (err) {
+                showToast(`Error en producción: ${err.message}`, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "🏭 Lanzar Corrida de Producción (1 Clic)";
+            }
+        }
+
+        // ==========================================
+        // Estación 3: Molino Granulador Logic
+        // ==========================================
+        function computeMassBalance() {
+            const input = parseFloat(document.getElementById("regrind-input-qty").value) || 0;
+            const output = (input * 0.965).toFixed(2);
+            const loss = (input - parseFloat(output)).toFixed(2);
+
+            document.getElementById("mb-input").textContent = `${formatNum(input)} kg`;
+            document.getElementById("mb-output").textContent = `${formatNum(output)} kg`;
+            document.getElementById("mb-loss").textContent = `${formatNum(loss)} kg`;
+        }
+
+        function setRegrindQty(qty) {
+            document.getElementById("regrind-input-qty").value = qty;
+            computeMassBalance();
+        }
+
+        function setRegrindAllScrap() {
+            const scrapInHopper = (lastState && lastState.kpis && lastState.kpis.scrap_mill_hopper_kg) || 14.0;
+            document.getElementById("regrind-input-qty").value = Math.max(1, scrapInHopper);
+            computeMassBalance();
+        }
+
+        async function executeRegrindMilling() {
+            const inputQty = parseFloat(document.getElementById("regrind-input-qty").value) || 0;
+            if (inputQty <= 0) {
+                showToast("Ingresa los kg de rebaba a moler", "error");
+                return;
+            }
+            const btn = document.getElementById("btn-regrind-submit");
+            btn.disabled = true;
+            btn.textContent = "⚙️ Moliendo Rebaba...";
+
+            try {
+                const res = await fetch("/api/v1/demo/quick-regrind", {
+                    method: "POST",
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        work_center_code: "PAGANI-GR-50",
+                        input_qty_kg: inputQty,
+                        loss_percent: 3.5,
+                    }),
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                showToast(`¡Molienda exitosa! Recuperados +${formatNum(data.output_regrind_kg)} kg de Regrind en tolva. Merma polvo: ${formatNum(data.process_loss_kg)} kg`, "success");
+                await refreshDashboardState();
+            } catch (err) {
+                showToast(`Error al moler rebaba: ${err.message}`, "error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "⚙️ Activar Molino Pagani y Recuperar Regrind";
+            }
+        }
+
+        // ==========================================
+        // Estación 4: Simulador WhatsApp / GrokBot RBAC
+        // ==========================================
+        async function sendBotPreset(text, tool, args) {
+            await sendBotCommand(text, tool, args);
+        }
+
+        function sendCustomChatMessage() {
+            const input = document.getElementById("chat-input");
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = "";
+            // Infiere herramienta o usa consulta general
+            sendBotCommand(text, "mrp:view_work_centers", {});
+        }
+
+        async function sendBotCommand(messageText, requestedTool, toolArgs) {
+            const chatStream = document.getElementById("chat-messages");
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            // Mensaje del usuario
+            const userMsg = document.createElement("div");
+            userMsg.className = "chat-msg chat-msg-user";
+            userMsg.innerHTML = `
+                <div>${messageText}</div>
+                <div class="chat-msg-meta">${currentRole} • ${timeStr}</div>
+            `;
+            chatStream.appendChild(userMsg);
+            chatStream.scrollTop = chatStream.scrollHeight;
+
+            try {
+                const res = await fetch("/api/v1/bot/whatsapp/webhook", {
+                    method: "POST",
+                    headers: getHeaders(),
+                    body: JSON.stringify({
+                        from_phone: currentPhone,
+                        message_text: messageText,
+                        requested_tool: requestedTool,
+                        tool_args: toolArgs,
+                    }),
+                });
+
+                const botMsg = document.createElement("div");
+                botMsg.className = "chat-msg chat-msg-bot";
+
+                if (res.status === 200) {
+                    const data = await res.json();
+                    botMsg.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                            <span class="badge badge-success" style="font-size: 0.65rem;">✓ 200 EXECUTED</span>
+                            <span style="font-size: 0.75rem; font-weight: 600;">Herramienta: ${requestedTool}</span>
+                        </div>
+                        <div>Comando ejecutado exitosamente por GrokBot. Acción validada y registrada en auditoría inmutable.</div>
+                        <div class="chat-msg-meta">GrokBot • ${timeStr}</div>
+                    `;
+                    showToast(`GrokBot: Herramienta '${requestedTool}' ejecutada`, "success");
+                } else if (res.status === 403) {
+                    const errData = await res.json();
+                    botMsg.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                            <span class="badge" style="background: var(--color-danger-subtle); color: var(--color-danger); border: 1px solid var(--color-danger); font-size: 0.65rem;">
+                                ✕ 403 RBAC DENIED
+                            </span>
+                            <span style="font-size: 0.75rem; font-weight: 600; color: var(--color-danger);">Acceso Denegado</span>
+                        </div>
+                        <div>${errData.detail || "Permiso insuficiente para esta herramienta."}</div>
+                        <div class="chat-msg-meta" style="color: var(--color-danger);">Seguridad RBAC • ${timeStr}</div>
+                    `;
+                    showToast(`RBAC Bloqueado: ${errData.detail}`, "error");
+                } else {
+                    botMsg.innerHTML = `
+                        <div>Error HTTP ${res.status} al procesar el mensaje.</div>
+                        <div class="chat-msg-meta">Error • ${timeStr}</div>
+                    `;
+                }
+
+                chatStream.appendChild(botMsg);
+                chatStream.scrollTop = chatStream.scrollHeight;
+                await refreshDashboardState();
+            } catch (err) {
+                const errDiv = document.createElement("div");
+                errDiv.className = "chat-msg chat-msg-bot";
+                errDiv.innerHTML = `<div>Error de red: ${err.message}</div>`;
+                chatStream.appendChild(errDiv);
+            }
+        }
+    </script>
+</body>
+</html>
